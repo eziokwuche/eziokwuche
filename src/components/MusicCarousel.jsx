@@ -19,6 +19,11 @@ const SCROLL_RENDER_EPS = 1e-5;
 /** Movement below this (px) counts as a tap for sync mobile audio (fat-finger friendly). */
 const TAP_MAX_MOVE_PX = 15;
 
+function parseAudioTracks(audioSrc) {
+  if (audioSrc == null || audioSrc === "") return [];
+  return audioSrc.split(";").map((s) => s.trim()).filter(Boolean);
+}
+
 function easeInOut(t) {
   return t < 0.5
     ? 0.5 * Math.pow(t * 2, 3)
@@ -65,6 +70,8 @@ export default function MusicCarousel() {
   const [, tick] = useState(0);
   const audioRef = useRef(MUSIC_CAROUSEL_AUDIO_ENGINE);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTrackIdx, setCurrentTrackIdx] = useState(0);
+  const currentTrackIdxRef = useRef(0);
   const activeIdxRef = useRef(0);
   const lastRenderedScrollRef = useRef(0);
   const onPointerDownRef = useRef(null);
@@ -79,6 +86,8 @@ export default function MusicCarousel() {
   const [isDragging, setIsDragging] = useState(false);
 
   const wrap = count > 5;
+
+  currentTrackIdxRef.current = currentTrackIdx;
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -100,10 +109,13 @@ export default function MusicCarousel() {
   }, [activeIdx]);
 
   useEffect(() => {
+    currentTrackIdxRef.current = 0;
+    setCurrentTrackIdx(0);
     const audio = audioRef.current;
-    const src = albums[activeIdx]?.audioSrc;
-    if (src) {
-      audio.src = src;
+    const tracks = parseAudioTracks(albums[activeIdx]?.audioSrc);
+    const first = tracks[0];
+    if (first) {
+      audio.src = first;
     } else {
       audio.removeAttribute("src");
     }
@@ -334,35 +346,48 @@ export default function MusicCarousel() {
     }
     if (idx !== closest) return;
 
-    const src = albums[idx]?.audioSrc;
-    if (src == null || src === "") {
+    const rawSrc = albums[idx]?.audioSrc;
+    if (rawSrc == null || rawSrc === "") {
+      touchGestureRef.current.maxDist = TAP_MAX_MOVE_PX;
+      return;
+    }
+    const tracks = parseAudioTracks(rawSrc);
+    if (tracks.length === 0) {
       touchGestureRef.current.maxDist = TAP_MAX_MOVE_PX;
       return;
     }
 
     const audio = MUSIC_CAROUSEL_AUDIO_ENGINE;
-    if (!audio.paused) {
-      audio.pause();
-      setIsPlaying(false);
-      activeAnimatedVideoRef.current?.pause?.();
-      touchGestureRef.current.maxDist = TAP_MAX_MOVE_PX;
-      return;
+
+    function assignSrcAndPlay(url) {
+      try {
+        const resolved = new URL(url, window.location.href).href;
+        if (audio.src !== resolved) audio.src = url;
+      } catch {
+        audio.src = url;
+      }
+      audio.load();
+      audio.volume = 1;
+      setIsPlaying(true);
+      const p = audio.play();
+      if (p !== undefined) {
+        void p.catch(() => {
+          setIsPlaying(false);
+          activeAnimatedVideoRef.current?.pause?.();
+        });
+      }
     }
-    try {
-      const resolved = new URL(src, window.location.href).href;
-      if (audio.src !== resolved) audio.src = src;
-    } catch {
-      audio.src = src;
+
+    if (audio.paused) {
+      const tIdx = Math.min(currentTrackIdxRef.current, tracks.length - 1);
+      assignSrcAndPlay(tracks[tIdx]);
+    } else {
+      const next = (currentTrackIdxRef.current + 1) % tracks.length;
+      currentTrackIdxRef.current = next;
+      setCurrentTrackIdx(next);
+      assignSrcAndPlay(tracks[next]);
     }
-    audio.volume = 1;
-    setIsPlaying(true);
-    const p = audio.play();
-    if (p !== undefined) {
-      void p.catch(() => {
-        setIsPlaying(false);
-        activeAnimatedVideoRef.current?.pause?.();
-      });
-    }
+
     const v = activeAnimatedVideoRef.current;
     if (v && albums[idx]?.animatedCover) {
       v.muted = true;

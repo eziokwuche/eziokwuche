@@ -1,0 +1,30 @@
+const albums = [
+  { title: "A Great Chaos", artist: "Ken Carson", cover: "/album covers/agreatchaos.jpeg", animatedCover: "/animated covers/agreatchaos.mp4", audioSrc: "/snippets/agckencarson.mp3"},
+  { title: "The Life of Pablo", artist: "Kanye West", cover: "/album covers/tlop.jpeg", animatedCover: null, audioSrc: "/snippets/tlopkanyewest.mp3"},
+  { title: "SOS", artist: "SZA", cover: "/album covers/sos.jpeg", animatedCover: "/animated covers/sos.mp4", audioSrc: "/snippets/sossza.mp3"},
+  { title: "Love Deluxe", artist: "Sade", cover: "/album covers/lovedeluxe.jpeg", animatedCover: null, audioSrc: "/snippets/lovedeluxesade.mp3"},
+  { title: "HEIS", artist: "Rema", cover: "/album covers/heis.jpeg", animatedCover: null, audioSrc: "/snippets/heisrema.mp3"},
+  { title: "Wunna (Deluxe)", artist: "Gunna", cover: "/album covers/wunna(deluxe).jpg", animatedCover: "/animated covers/wunna(deluxe).mp4", audioSrc: "/snippets/wunna(deluxe)gunna.mp3"},
+  { title: "So Much Fun", artist: "Young Thug", cover: "/album covers/somuchfun.jpeg", animatedCover: null, audioSrc: "/snippets/somuchfunyoungthug.mp3"},
+  { title: "Lyfë", artist: "Yeat", cover: "/album covers/lyfë.jpg", animatedCover: "/animated covers/lyfë.mp4", audioSrc: "/snippets/lyfëyeat.mp3"},
+  { title: "The Melodic Blue", artist: "Baby Keem", cover: "/album covers/themelodicblue.jpeg", animatedCover: null, audioSrc: "/snippets/themelodicbluebabykeem.mp3"},
+  { title: "Demon Days", artist: "Gorillaz", cover: "/album covers/demondays.jpeg", animatedCover: null, audioSrc: "/snippets/demondaysgorillaz.mp3"},
+  { title: "MUSIC", artist: "Playboi Carti", cover: "/album covers/music.jpg", animatedCover: null, audioSrc: "/snippets/musicplayboicarti.mp3"},
+  { title: "Mr. Money With The Vibe", artist: "Asake", cover: "/album covers/mmwtv.jpeg", animatedCover: null, audioSrc: "/snippets/mmwtvasake.mp3"},
+  { title: "My Turn (Deluxe)", artist: "Lil Baby", cover: "/album covers/myturn(deluxe).jpg", animatedCover: "/animated covers/myturn(deluxe).mp4", audioSrc: "/snippets/myturn(deluxe)lilbaby.mp3"},
+  { title: "Blonde", artist: "Frank Ocean", cover: "/album covers/blonde.jpeg", animatedCover: null, audioSrc: "/snippets/blondefrankocean.mp3"},
+  { title: "HNDRXX", artist: "Future", cover: "/album covers/hndrxx.jpg", animatedCover: null, audioSrc: "/snippets/hndrxxfuture.mp3"},
+  { title: "Discovery", artist: "Daft Punk", cover: "/album covers/discovery.jpeg", animatedCover: null, audioSrc: "/snippets/discoverydaftpunk.mp3"},
+  { title: "MM...FOOD", artist: "MF DOOM", cover: "/album covers/mmfood.jpeg", animatedCover: null, audioSrc: "/snippets/mmfoodmfdoom.mp3"},
+  { title: "Beyoncé (Platinum Edition)", artist: "Beyoncé", cover: "/album covers/beyoncé(platinumedition).jpg", animatedCover: null, audioSrc: "/snippets/beyoncé(platinumedition)beyoncé.mp3"},
+  { title: "Timeless", artist: "Davido", cover: "/album covers/timeless.jpg", animatedCover: "/animated covers/timeless.mp4", audioSrc: "/snippets/timelessdavido.mp3"},
+  { title: "Born in the Wild", artist: "Tems", cover: "/album covers/borninthewild.jpg", animatedCover: "/animated covers/borninthewild.mp4", audioSrc: "/snippets/borninthewildtems.mp3"},
+  { title: "Luv Is Rage 2", artist: "Lil Uzi Vert", cover: "/album covers/luvisrage2.jpeg", animatedCover: "/animated covers/luvisrage2.mp4", audioSrc: "/snippets/luvisrage2liluzivert.mp3"},
+  { title: "Thriller", artist: "Michael Jackson", cover: "/album covers/thriller.jpeg", animatedCover: "/animated covers/thriller.mp4", audioSrc: "/snippets/thrillermichaeljackson.mp3"},
+  { title: "R Plus Seven", artist: "Oneohtrix Point Never", cover: "/album covers/rplusseven.jpeg", animatedCover: null, audioSrc: "/snippets/rplussevenoneohtrixpointnever.mp3"},
+  { title: "good kid, m.A.A.d city", artist: "Kendrick Lamar", cover: "/album covers/gkmc.jpeg", animatedCover: null, audioSrc: "/snippets/gkmckendricklamar.mp3"},
+  { title: "Ijele The Traveler", artist: "Flavour", cover: "/album covers/ijele.jpeg", animatedCover: null, audioSrc: "/snippets/ijelethetravelerflavour.mp3"},
+  
+];
+
+export default albums;

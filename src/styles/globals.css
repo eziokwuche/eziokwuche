@@ -1,0 +1,712 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  color: #fff;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  scrollbar-width: none;
+}
+
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Hero ─────────────────────────────────────── */
+
+.hero {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: #000000;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+
+.hero canvas {
+  display: block;
+  background: #000000;
+  will-change: transform;
+  touch-action: pan-y;
+  pointer-events: auto;
+}
+
+/* ── Page sections ────────────────────────────── */
+
+.page-section {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #000;
+  padding: 80px 24px;
+}
+
+.page-section.full-height {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 120px;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0 0 24px;
+  text-align: left;
+  color: #fff;
+}
+
+.section-text {
+  font-size: clamp(0.95rem, 2vw, 1.125rem);
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+/* ── Home entrance ────────────────────────────── */
+
+.home-entrance {
+  background: #000;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Bio ──────────────────────────────────────── */
+
+.bio-text {
+  max-width: 680px;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+/* ── Music Cover Flow ─────────────────────────── */
+
+.music-section {
+  position: relative;
+  width: 100%;
+  padding: 80px 0;
+  background: #000;
+  overflow: hidden;
+}
+
+.music-title {
+  color: #fff;
+  margin-bottom: 40px;
+}
+
+.coverflow-stage {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.coverflow-stage:active {
+  cursor: grabbing;
+}
+
+.coverflow-perspective {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 500px;
+  transform-style: preserve-3d;
+}
+
+.cf-item {
+  text-align: center;
+  will-change: transform, opacity;
+  transform-style: preserve-3d;
+  transition: opacity 0.15s ease;
+  cursor: pointer;
+}
+
+.cf-label {
+  margin-top: 12px;
+}
+
+.album-cover {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  transition: box-shadow 0.2s ease;
+}
+
+.cf-item--active .album-cover {
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.65);
+}
+
+.album-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+.album-cover-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+@keyframes animated-cover-video-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animated-cover-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 5;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  animation: animated-cover-video-in 0.4s ease forwards;
+}
+
+.album-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.album-artist {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.audio-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 32px;
+}
+
+.play-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: not-allowed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── Experience Timeline ──────────────────────── */
+
+.timeline {
+  position: relative;
+  padding-left: 28px;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 8px;
+  bottom: 8px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.timeline-entry {
+  position: relative;
+  padding-bottom: 48px;
+}
+
+.timeline-entry:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -25px;
+  top: 6px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.timeline-period {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.timeline-role {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 4px;
+}
+
+.timeline-company {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 8px;
+}
+
+.timeline-desc {
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+  max-width: 560px;
+}
+
+/* ── Skills Carousel ──────────────────────────── */
+
+.skills-section {
+  min-height: auto;
+  padding-bottom: 80px;
+}
+
+.skills-ribbon-wrapper {
+  width: 100%;
+  overflow: hidden;
+  margin-top: 24px;
+}
+
+.skills-ribbon {
+  display: flex;
+  gap: 48px;
+  width: max-content;
+  animation: skillsScroll 30s linear infinite;
+}
+
+@keyframes skillsScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.skill-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.skill-item i {
+  font-size: 36px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.skill-name {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+/* ── Project Grid ─────────────────────────────── */
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.project-card {
+  display: block;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 30px rgba(255, 255, 255, 0.04);
+}
+
+.project-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.project-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.project-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.project-info {
+  padding: 20px;
+}
+
+.project-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.project-arrow {
+  font-size: 14px;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.project-card:hover .project-arrow {
+  opacity: 1;
+}
+
+.project-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 12px;
+}
+
+.project-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.project-tag {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.07);
+  padding: 3px 10px;
+  border-radius: 100px;
+  letter-spacing: 0.02em;
+}
+
+/* ── GitHub CTA ───────────────────────────────── */
+
+.github-cta-section {
+  min-height: auto;
+  padding: 80px 24px;
+}
+
+.github-cta {
+  text-align: center;
+}
+
+.github-cta-heading {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+.github-cta-sub {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 32px;
+}
+
+/* ── Footer ───────────────────────────────────── */
+
+/* ── Footer ───────────────────────────────────── */
+
+.site-footer {
+  width: 100%;
+  background: #000;
+  color: #fff;
+  overflow: hidden;
+  padding: 3.5rem 1.25rem;
+}
+
+/* ── Navs section ── */
+.ft-navs {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  padding-bottom: 3rem;
+}
+
+.ft-navs-self {
+  display: flex;
+  gap: 6rem;
+}
+
+.ft-nav {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.ft-label {
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+  margin: 0;
+  white-space: nowrap;
+  padding-top: 0.6em;
+}
+
+.ft-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ft-link {
+  background: none;
+  border: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 47px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: opacity 0.2s;
+  text-align: left;
+  line-height: 1.15;
+}
+
+.ft-link:hover {
+  opacity: 0.5;
+}
+
+.ft-link--active {
+  opacity: 0.5;
+}
+
+.ft-link--info {
+  font-size: 31px;
+}
+
+.ft-link--static {
+  cursor: default;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.ft-mails {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2.5rem;
+  text-align: right;
+}
+
+.ft-mail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.ft-mail .ft-label {
+  margin-bottom: 1rem;
+  text-align: right;
+  padding-top: 0;
+}
+
+.ft-mail .ft-link {
+  text-align: right;
+}
+
+/* ── End section (name + bottom texts) ── */
+.ft-end {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.ft-end-logo {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15em;
+  font-size: clamp(2rem, 11.5vw, 12rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-align: center;
+  padding-bottom: 1.25rem;
+}
+
+.ft-end-icon {
+  height: 0.75em;
+  width: auto;
+  object-fit: contain;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ft-end-texts {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.ft-end-sign,
+.ft-end-location {
+  margin: 0;
+}
+
+/* ── Mobile ───────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .project-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .coverflow-stage {
+    height: 280px;
+  }
+
+  .music-section {
+    padding: 60px 0;
+  }
+
+  .skills-ribbon {
+    gap: 32px;
+  }
+
+  .skill-item i {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ft-navs {
+    flex-direction: column;
+    gap: 5rem;
+  }
+
+  .ft-navs-self {
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .ft-mails {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .ft-mail {
+    align-items: flex-start;
+  }
+
+  .ft-mail .ft-label {
+    text-align: left;
+  }
+
+  .ft-mail .ft-link {
+    text-align: left;
+  }
+
+  .ft-link {
+    font-size: 32px;
+  }
+
+  .ft-link--info {
+    font-size: 22px;
+  }
+
+  .ft-end-logo {
+    font-size: clamp(2rem, 11.5vw, 5rem);
+  }
+
+  .ft-end-texts {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .page-section {
+    padding: 60px 20px;
+  }
+
+  .page-section.full-height {
+    padding-top: 80px;
+  }
+}

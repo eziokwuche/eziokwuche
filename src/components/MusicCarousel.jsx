@@ -3,6 +3,7 @@ import albums from "@/data/albums";
 
 /** Single shared engine — avoids extra `Audio` instances (e.g. React Strict Mode remounts). */
 const MUSIC_CAROUSEL_AUDIO_ENGINE = new Audio();
+MUSIC_CAROUSEL_AUDIO_ENGINE.preload = "auto";
 
 const TILT = 0.9;
 const SPACING = 0.25;
@@ -70,6 +71,8 @@ export default function MusicCarousel() {
   const onPointerMoveRef = useRef(null);
   const onPointerUpRef = useRef(null);
   const handleNativeCenterTapRef = useRef(null);
+  /** Touchstart/mousedown target .cf-item — touchend target is unreliable on iOS Safari. */
+  const touchedCfItemRef = useRef(null);
   const touchGestureRef = useRef({ startX: 0, startY: 0, maxDist: 0 });
   const [isDragging, setIsDragging] = useState(false);
 
@@ -186,6 +189,7 @@ export default function MusicCarousel() {
 
   function onPointerDown(e) {
     e.preventDefault();
+    touchedCfItemRef.current = e.target?.closest?.(".cf-item") ?? null;
     const x = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
     const y = e.clientY ?? e.touches?.[0]?.clientY ?? 0;
     touchGestureRef.current = { startX: x, startY: y, maxDist: 0 };
@@ -300,14 +304,30 @@ export default function MusicCarousel() {
   onPointerUpRef.current = onPointerUp;
 
   handleNativeCenterTapRef.current = (e) => {
-    if (touchGestureRef.current.maxDist >= TAP_MAX_MOVE_PX) return;
+    if (touchGestureRef.current.maxDist >= TAP_MAX_MOVE_PX) {
+      touchedCfItemRef.current = null;
+      return;
+    }
     const root = wrapperRef.current;
-    const tappedItem = e.target?.closest?.(".cf-item");
+    const tappedItem =
+      touchedCfItemRef.current ?? e?.target?.closest?.(".cf-item");
+    touchedCfItemRef.current = null;
     if (!tappedItem || !root?.contains(tappedItem)) return;
     const raw = tappedItem.dataset?.albumIndex;
     if (raw === undefined) return;
     const idx = Number(raw);
-    if (idx !== activeIdxRef.current) return;
+
+    let closest = 0;
+    let minOff = Infinity;
+    for (let i = 0; i < count; i++) {
+      const off = itemOffset(i, scrollRef.current, count, wrap);
+      const d = Math.abs(off);
+      if (d < minOff) {
+        minOff = d;
+        closest = i;
+      }
+    }
+    if (idx !== closest) return;
 
     const src = albums[idx]?.audioSrc;
     if (src == null || src === "") {
@@ -328,7 +348,13 @@ export default function MusicCarousel() {
     } catch {
       audio.src = src;
     }
-    void audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+    audio.volume = 1;
+    const p = audio.play();
+    if (p !== undefined) {
+      void p.then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+    } else {
+      setIsPlaying(true);
+    }
     touchGestureRef.current.maxDist = TAP_MAX_MOVE_PX;
   };
 
@@ -342,10 +368,11 @@ export default function MusicCarousel() {
       onPointerMoveRef.current?.(e);
     };
     const onTouchEnd = (e) => {
-      onPointerUpRef.current?.();
       handleNativeCenterTapRef.current?.(e);
+      onPointerUpRef.current?.();
     };
     const onTouchCancel = () => {
+      touchedCfItemRef.current = null;
       onPointerUpRef.current?.();
     };
     el.addEventListener("touchstart", onTouchStart, { passive: false });
@@ -402,8 +429,8 @@ export default function MusicCarousel() {
         onMouseDown={onPointerDown}
         onMouseMove={onPointerMove}
         onMouseUp={(e) => {
-          onPointerUp();
           handleNativeCenterTapRef.current?.(e.nativeEvent);
+          onPointerUp();
         }}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}

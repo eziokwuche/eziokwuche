@@ -74,7 +74,8 @@ export default function MusicCarousel() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrackIdx, setCurrentTrackIdx] = useState(0);
   const currentTrackIdxRef = useRef(0);
-  const isPlayingRef = useRef(false);
+  /** Previous track index before last double-tap shuffle (avoids A→B→A repeats). */
+  const lastTrackIdxRef = useRef(null);
   const clickTimeoutRef = useRef(null);
   const activeIdxRef = useRef(0);
   const lastRenderedScrollRef = useRef(0);
@@ -92,7 +93,6 @@ export default function MusicCarousel() {
   const wrap = count > 5;
 
   currentTrackIdxRef.current = currentTrackIdx;
-  isPlayingRef.current = isPlaying;
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -124,6 +124,7 @@ export default function MusicCarousel() {
   useEffect(() => {
     currentTrackIdxRef.current = 0;
     setCurrentTrackIdx(0);
+    lastTrackIdxRef.current = null;
     const audio = audioRef.current;
     const tracks = parseAudioTracks(albums[activeIdx]?.audioSrc);
     const first = tracks[0];
@@ -372,7 +373,8 @@ export default function MusicCarousel() {
 
     const audio = MUSIC_CAROUSEL_AUDIO_ENGINE;
 
-    function assignSrcAndPlaySync(url) {
+    /** Double-tap smart shuffle only: new src resets playhead to 0:00. */
+    function loadTrackAndPlaySync(url) {
       try {
         const resolved = new URL(url, window.location.href).href;
         if (audio.src !== resolved) audio.src = url;
@@ -380,6 +382,19 @@ export default function MusicCarousel() {
         audio.src = url;
       }
       audio.load();
+      audio.volume = 1;
+      setIsPlaying(true);
+      const p = audio.play();
+      if (p !== undefined) {
+        void p.catch(() => {
+          setIsPlaying(false);
+          activeAnimatedVideoRef.current?.pause?.();
+        });
+      }
+    }
+
+    /** Single-tap resume: do not touch .src (preserves playhead). */
+    function resumeWithoutChangingSrc() {
       audio.volume = 1;
       setIsPlaying(true);
       const p = audio.play();
@@ -405,10 +420,30 @@ export default function MusicCarousel() {
     if (clickTimeoutRef.current != null) {
       clearTimeout(clickTimeoutRef.current);
       clickTimeoutRef.current = null;
-      const next = (currentTrackIdxRef.current + 1) % tracks.length;
-      currentTrackIdxRef.current = next;
-      setCurrentTrackIdx(next);
-      assignSrcAndPlaySync(tracks[next]);
+      const cur = currentTrackIdxRef.current;
+      let nextIdx;
+      if (tracks.length > 2) {
+        const candidates = [];
+        for (let i = 0; i < tracks.length; i++) {
+          if (i === cur) continue;
+          if (lastTrackIdxRef.current != null && i === lastTrackIdxRef.current) continue;
+          candidates.push(i);
+        }
+        if (candidates.length === 0) {
+          for (let i = 0; i < tracks.length; i++) {
+            if (i !== cur) candidates.push(i);
+          }
+        }
+        nextIdx = candidates[Math.floor(Math.random() * candidates.length)];
+      } else if (tracks.length === 2) {
+        nextIdx = cur === 0 ? 1 : 0;
+      } else {
+        nextIdx = 0;
+      }
+      lastTrackIdxRef.current = cur;
+      currentTrackIdxRef.current = nextIdx;
+      setCurrentTrackIdx(nextIdx);
+      loadTrackAndPlaySync(tracks[nextIdx]);
       tryPlayAnimatedVideo();
       touchGestureRef.current.maxDist = TAP_MAX_MOVE_PX;
       return;
@@ -416,15 +451,13 @@ export default function MusicCarousel() {
 
     clickTimeoutRef.current = window.setTimeout(() => {
       clickTimeoutRef.current = null;
-      const tIdx = Math.min(currentTrackIdxRef.current, tracks.length - 1);
-      const url = tracks[tIdx];
-      if (isPlayingRef.current) {
+      if (audio.paused) {
+        resumeWithoutChangingSrc();
+        tryPlayAnimatedVideo();
+      } else {
         audio.pause();
         setIsPlaying(false);
         activeAnimatedVideoRef.current?.pause?.();
-      } else {
-        assignSrcAndPlaySync(url);
-        tryPlayAnimatedVideo();
       }
     }, TAP_DELAY_MS);
 

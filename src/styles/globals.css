@@ -289,6 +289,17 @@ select {
   animation: animated-cover-video-in 0.4s ease forwards;
 }
 
+/* Ensure animated covers paint above poster on mobile (no desktop-only gating). */
+@media (max-width: 768px) {
+  .animated-cover-video {
+    display: block;
+    object-position: center center;
+    /* iOS compositing */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+}
+
 .album-title {
   display: inline-flex;
   align-items: center;
@@ -323,7 +334,7 @@ select {
 
 .album-artist {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.72);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -954,6 +965,35 @@ select {
     padding: 60px 0;
   }
 
+  .music-section .container {
+    padding-left: max(1.25rem, env(safe-area-inset-left));
+    padding-right: max(1.25rem, env(safe-area-inset-right));
+  }
+
+  .music-title {
+    color: #fff;
+  }
+
+  /* Footer: stack label above links so Explore + Connect link columns share one left edge */
+  .ft-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .ft-nav .ft-label {
+    padding-top: 0;
+  }
+
+  .site-footer {
+    padding-left: max(1.25rem, env(safe-area-inset-left));
+    padding-right: max(1.25rem, env(safe-area-inset-right));
+  }
+
+  .ft-navs .ft-nav .ft-link {
+    font-size: clamp(1.5rem, 5.5vw, 2.25rem);
+  }
+
   .skills-marquee-stack {
     max-width: min(720px, 93vw);
     padding: 1rem 0;
@@ -996,6 +1036,11 @@ select {
     gap: 2.5rem;
   }
 
+  .site-footer {
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+  }
+
   .ft-mails {
     align-items: flex-start;
     text-align: left;
@@ -1013,12 +1058,13 @@ select {
     text-align: left;
   }
 
-  .ft-link {
-    font-size: 32px;
+  /* Same size for Explore + Connect links (not mail / contact lines) */
+  .ft-navs .ft-nav .ft-link {
+    font-size: clamp(1.5rem, 7.5vw, 2rem);
   }
 
-  .ft-link--info {
-    font-size: 22px;
+  .ft-mails .ft-link--info {
+    font-size: clamp(1rem, 4.2vw, 1.375rem);
   }
 
   .ft-end-logo-marquee {

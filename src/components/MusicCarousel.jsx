@@ -632,9 +632,10 @@ export default function MusicCarousel() {
                     poster={album.cover}
                     muted
                     playsInline
-                    preload="metadata"
+                    preload="auto"
                     loop
                     disablePictureInPicture
+                    controls={false}
                     controlsList="nodownload nofullscreen noremoteplayback"
                     onContextMenu={(e) => e.preventDefault()}
                   />

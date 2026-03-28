@@ -6,10 +6,14 @@
   box-sizing: border-box;
 }
 
-html, body {
+html {
+  background: #000;
+}
+
+body {
   margin: 0;
   padding: 0;
-  background: #000;
+  background: transparent;
   color: #fff;
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   min-height: 100vh;
@@ -19,6 +23,80 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
   scrollbar-width: none;
+}
+
+#root,
+#smooth-wrapper,
+#smooth-content,
+main {
+  background: transparent;
+}
+
+#root {
+  min-height: 100%;
+}
+
+/* Full-page blurred album underglow — sits behind #smooth-wrapper (z-index: 0). */
+.global-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+@keyframes ambient-drift {
+  0% {
+    transform: translate(-50%, -50%) translateZ(0) scale(1.5) translate(0, 0)
+      rotate(0deg);
+  }
+  33% {
+    transform: translate(-50%, -50%) translateZ(0) scale(1.78) translate(4.5%, 3%)
+      rotate(2.5deg);
+  }
+  66% {
+    transform: translate(-50%, -50%) translateZ(0) scale(1.34) translate(-3.5%, 5.5%)
+      rotate(-2.5deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) translateZ(0) scale(1.5) translate(0, 0)
+      rotate(0deg);
+  }
+}
+
+.global-ambient__img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  transform-origin: center center;
+  object-fit: cover;
+  filter: blur(80px);
+  will-change: transform;
+  animation: ambient-drift 38s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .global-ambient__img {
+    animation: none;
+    transform: translate(-50%, -50%) translateZ(0) scale(1.5);
+  }
+}
+
+.global-ambient__scrim {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+}
+
+#smooth-wrapper {
+  position: relative;
+  z-index: 0;
 }
 
 
@@ -42,14 +120,14 @@ select {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background: #000000;
+  background: transparent;
   cursor: pointer;
   touch-action: pan-y;
 }
 
 .hero canvas {
   display: block;
-  background: #000000;
+  background: transparent;
   will-change: transform;
   touch-action: pan-y;
   pointer-events: auto;
@@ -62,7 +140,7 @@ select {
   width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
-  background: #000;
+  background: transparent;
   padding: 80px 24px;
 }
 
@@ -98,7 +176,7 @@ select {
 /* ── Home entrance ────────────────────────────── */
 
 .home-entrance {
-  background: #000;
+  background: transparent;
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
@@ -118,7 +196,7 @@ select {
 .home-intro {
   position: relative;
   width: 100%;
-  background: #000;
+  background: transparent;
   color: #fff;
 }
 
@@ -182,7 +260,7 @@ select {
   position: relative;
   width: 100%;
   padding: 80px 0;
-  background: #000;
+  background: transparent;
   overflow: hidden;
 }
 
@@ -749,7 +827,7 @@ select {
 
 .site-footer {
   width: 100%;
-  background: #000;
+  background: transparent;
   color: #fff;
   overflow: hidden;
   padding: 3.5rem 1.25rem;

@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import albums from "@/data/albums";
 import { ExplicitIcon } from "@/components/icons/ExplicitIcon";
-
-/** Single shared engine — avoids extra `Audio` instances (e.g. React Strict Mode remounts). */
-const MUSIC_CAROUSEL_AUDIO_ENGINE = new Audio();
-MUSIC_CAROUSEL_AUDIO_ENGINE.preload = "auto";
+import { useMusicPlayback } from "@/context/MusicPlaybackContext";
+import { resolvedMediaUrl } from "@/utils/resolvedMediaUrl";
+import { MUSIC_CAROUSEL_AUDIO_ENGINE } from "@/audio/musicCarouselAudio";
 
 const TILT = 0.9;
 const SPACING = 0.25;
@@ -23,18 +22,6 @@ const TAP_MAX_MOVE_PX = 15;
 function parseAudioTracks(audioSrc) {
   if (audioSrc == null || audioSrc === "") return [];
   return audioSrc.split(";").map((s) => s.trim()).filter(Boolean);
-}
-
-/** Encode spaces/special chars in public paths (e.g. `/album covers/…`) for reliable fetch on all browsers. */
-function resolvedMediaUrl(path) {
-  if (path == null || path === "") return "";
-  const trimmed = String(path).trim();
-  if (typeof window === "undefined") return trimmed;
-  try {
-    return new URL(trimmed, window.location.href).href;
-  } catch {
-    return trimmed;
-  }
 }
 
 /** Fisher–Yates shuffle of indices 0..n-1 */
@@ -78,6 +65,12 @@ function coverFlowTransform(offset) {
 }
 
 export default function MusicCarousel() {
+  const {
+    currentAlbumIndex: activeIdx,
+    setCurrentAlbumIndex: setActiveIdx,
+    isPlaying,
+    setIsPlaying,
+  } = useMusicPlayback();
   const count = albums.length;
   const sectionRef = useRef(null);
   const wrapperRef = useRef(null);
@@ -89,10 +82,8 @@ export default function MusicCarousel() {
   const snapRef = useRef(null);
   const autoRef = useRef(true);
   const hoveredRef = useRef(false);
-  const [activeIdx, setActiveIdx] = useState(0);
   const [, tick] = useState(0);
   const audioRef = useRef(MUSIC_CAROUSEL_AUDIO_ENGINE);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrackIdx, setCurrentTrackIdx] = useState(0);
   const currentTrackIdxRef = useRef(0);
   /** Permutation of track indices for the current “round”; each index appears once per round. */
@@ -346,6 +337,10 @@ export default function MusicCarousel() {
       let needsTick = false;
       if (closest !== activeIdxRef.current) {
         activeIdxRef.current = closest;
+        /* Same tick as album index: pause + isPlaying false before paint, so GlobalAmbient
+         never binds the new cover while still "playing" (avoids wrong art during fade). */
+        MUSIC_CAROUSEL_AUDIO_ENGINE.pause();
+        setIsPlaying(false);
         setActiveIdx(closest);
         needsTick = true;
       }
@@ -585,8 +580,6 @@ export default function MusicCarousel() {
       el.removeEventListener("touchcancel", onTouchCancel);
     };
   }, []);
-
-  const bgColor = albums[activeIdx]?.dominantColor || "#000";
 
   const visible = [];
   for (let i = 0; i < count; i++) {

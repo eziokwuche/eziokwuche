@@ -7,6 +7,9 @@ import AboutPage from "@/pages/AboutPage";
 import ExperiencePage from "@/pages/ExperiencePage";
 import ProjectsPage from "@/pages/ProjectsPage";
 import Footer from "@/components/Footer";
+import GlobalAmbientBackground from "@/components/GlobalAmbientBackground";
+import { useMusicPlayback } from "@/context/MusicPlaybackContext";
+import { MUSIC_CAROUSEL_AUDIO_ENGINE } from "@/audio/musicCarouselAudio";
 
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
@@ -20,6 +23,13 @@ const VIEWS = {
 export default function App() {
   const [view, setView] = useState("home");
   const smootherRef = useRef(null);
+  const { setIsPlaying } = useMusicPlayback();
+
+  /** Leaving any page (e.g. About with music) should stop audio + fade global ambient to black. */
+  useEffect(() => {
+    MUSIC_CAROUSEL_AUDIO_ENGINE.pause();
+    setIsPlaying(false);
+  }, [view, setIsPlaying]);
 
   useEffect(() => {
     smootherRef.current = ScrollSmoother.create({
@@ -81,13 +91,16 @@ export default function App() {
   const Page = VIEWS[view];
 
   return (
-    <div id="smooth-wrapper">
-      <div id="smooth-content">
-        <main>
-          <Page navigate={navigate} />
-        </main>
-        {view !== "home" && <Footer currentView={view} navigate={navigate} />}
+    <>
+      <GlobalAmbientBackground />
+      <div id="smooth-wrapper">
+        <div id="smooth-content">
+          <main>
+            <Page navigate={navigate} />
+          </main>
+          {view !== "home" && <Footer currentView={view} navigate={navigate} />}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

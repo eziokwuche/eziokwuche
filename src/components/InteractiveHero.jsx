@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
+import { useMusicPlayback } from "@/context/MusicPlaybackContext";
 
 const SIN_SIZE = 256;
 const SIN_TABLE = new Float32Array(SIN_SIZE);
@@ -25,15 +26,24 @@ function getBreakpoint() {
 }
 
 export default function InteractiveHero() {
+  const { registerHeroSection } = useMusicPlayback();
   const canvasRef = useRef(null);
   const sectionRef = useRef(null);
+
+  const setSectionRef = useCallback(
+    (node) => {
+      sectionRef.current = node;
+      registerHeroSection(node);
+    },
+    [registerHeroSection]
+  );
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const section = sectionRef.current;
     if (!canvas || !section) return;
 
-    const ctx = canvas.getContext("2d", { alpha: false });
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
     let particles = [];
@@ -86,41 +96,69 @@ export default function InteractiveHero() {
 
     sizeCanvas();
 
-    function getCoords(e) {
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    function getPointerCoords(e) {
       const rect = canvas.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) return;
-      mouseX = (clientX - rect.left) * (cw / rect.width);
-      mouseY = (clientY - rect.top) * (ch / rect.height);
+      mouseX = (e.clientX - rect.left) * (cw / rect.width);
+      mouseY = (e.clientY - rect.top) * (ch / rect.height);
     }
 
-    function clearMouse() {
+    function clearPointer() {
       mouseX = -1000;
       mouseY = -1000;
+    }
+
+    function onPointerLeave(e) {
+      /* Touch/pen: no "leave" on finger lift — keep last position (same as mouse resting on canvas). */
+      if (e.pointerType === "mouse") clearPointer();
+    }
+
+    function onPointerDownCapture(e) {
+      getPointerCoords(e);
+      try {
+        canvas.setPointerCapture(e.pointerId);
+      } catch {
+        /* unsupported */
+      }
+    }
+
+    function onPointerUpCapture(e) {
+      getPointerCoords(e);
+      try {
+        canvas.releasePointerCapture(e.pointerId);
+      } catch {
+        /* */
+      }
+    }
+
+    function onPointerCancelCapture(e) {
+      try {
+        canvas.releasePointerCapture(e.pointerId);
+      } catch {
+        /* */
+      }
+      clearPointer();
     }
 
     function bindPointers() {
       if (pointersBound) return;
       pointersBound = true;
-      canvas.addEventListener("mousemove", getCoords);
-      canvas.addEventListener("mouseleave", clearMouse);
-      canvas.addEventListener("touchstart", getCoords, { passive: true });
-      canvas.addEventListener("touchmove", getCoords, { passive: true });
-      canvas.addEventListener("touchend", clearMouse, { passive: true });
-      canvas.addEventListener("touchcancel", clearMouse, { passive: true });
+      canvas.addEventListener("pointermove", getPointerCoords);
+      canvas.addEventListener("pointerdown", onPointerDownCapture);
+      canvas.addEventListener("pointerup", onPointerUpCapture);
+      canvas.addEventListener("pointercancel", onPointerCancelCapture);
+      canvas.addEventListener("pointerleave", onPointerLeave);
     }
 
     function unbindPointers() {
       if (!pointersBound) return;
       pointersBound = false;
-      canvas.removeEventListener("mousemove", getCoords);
-      canvas.removeEventListener("mouseleave", clearMouse);
-      canvas.removeEventListener("touchstart", getCoords);
-      canvas.removeEventListener("touchmove", getCoords);
-      canvas.removeEventListener("touchend", clearMouse);
-      canvas.removeEventListener("touchcancel", clearMouse);
-      clearMouse();
+      canvas.removeEventListener("pointermove", getPointerCoords);
+      canvas.removeEventListener("pointerdown", onPointerDownCapture);
+      canvas.removeEventListener("pointerup", onPointerUpCapture);
+      canvas.removeEventListener("pointercancel", onPointerCancelCapture);
+      canvas.removeEventListener("pointerleave", onPointerLeave);
+      clearPointer();
     }
 
     function makeDotSprite(size) {
@@ -135,7 +173,11 @@ export default function InteractiveHero() {
       return c;
     }
 
-    function buildParticles(img) {
+    /**
+     * @param {{ preserveReveal?: boolean }} opts - If true (e.g. viewport resize, same asset), skip replaying the intro wipe so mobile URL-bar resizes don't "reload" the hero.
+     */
+    function buildParticles(img, opts = {}) {
+      const preserveReveal = opts.preserveReveal === true;
       if (!img.naturalWidth || !img.naturalHeight) return;
 
       sizeCanvas();
@@ -234,6 +276,15 @@ export default function InteractiveHero() {
       startTime = performance.now();
       revealDone = false;
       pausedAt = 0;
+
+      if (preserveReveal && particles.length > 0) {
+        revealDone = true;
+        const now = performance.now();
+        for (let i = 0, len = particles.length; i < len; i++) {
+          particles[i].active = true;
+          particles[i].t = now;
+        }
+      }
     }
 
     function rebaseTimestamps() {
@@ -257,8 +308,7 @@ export default function InteractiveHero() {
       }
       rafId = requestAnimationFrame(draw);
 
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, cw, ch);
+      ctx.clearRect(0, 0, cw, ch);
 
       const now = performance.now();
       const rp = Math.min(1, (now - startTime) / 1500);
@@ -395,16 +445,22 @@ export default function InteractiveHero() {
         currentAsset = bp.asset;
         heroImg.src = bp.asset;
       } else if (loadedImg) {
-        buildParticles(loadedImg);
+        buildParticles(loadedImg, { preserveReveal: true });
       }
     }
+
+    const resizeDebounceMs =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(pointer: coarse)")?.matches
+        ? 450
+        : 220;
 
     function handleResize() {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         if (destroyed) return;
         applyBreakpoint();
-      }, 200);
+      }, resizeDebounceMs);
     }
     window.addEventListener("resize", handleResize);
 
@@ -442,7 +498,7 @@ export default function InteractiveHero() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="hero">
+    <section ref={setSectionRef} className="hero">
       <canvas ref={canvasRef} />
     </section>
   );

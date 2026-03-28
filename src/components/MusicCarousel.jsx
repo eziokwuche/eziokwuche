@@ -17,25 +17,26 @@ const AUTO_SCROLL = 0.00;
 const SNAP_DURATION = 400;
 const SCROLL_RENDER_EPS = 1e-5;
 /**
- * If coverflow scroll offset moved more than this during the pointer gesture (in album-index
- * units), touchend must not toggle play — otherwise small drags read as taps (worse with coarse
- * tap slop on mobile).
+ * If coverflow scroll offset moved more than this during the gesture (album-index units), do not
+ * treat as a play/pause tap.
  */
-const TAP_MAX_SCROLL_OFFSET_DELTA = 0.03;
-/** Fine pointer: movement below this (px) counts as a tap for play/pause. */
+const TAP_MAX_SCROLL_OFFSET_DELTA = 0.02;
+/** Fine pointer (mouse): max movement from down→up for a tap. */
 const TAP_MAX_MOVE_FINE_PX = 18;
-/** Touch / coarse pointer: allow more slop so a normal tap still toggles play (not confused with a tiny drag). */
-const TAP_MAX_MOVE_COARSE_PX = 56;
+/**
+ * Touch: horizontal movement beyond this is a carousel drag (coverflow only uses dx), not a tap.
+ */
+const TOUCH_TAP_MAX_H_PX = 16;
+/**
+ * Touch: vertical movement beyond this is usually page scroll; combined slop alone would still
+ * allow play because scrollRef barely changes.
+ */
+const TOUCH_TAP_MAX_V_PX = 28;
+/** Touch: max total wiggle from touch point for a tap (after axis checks). */
+const TOUCH_TAP_MAX_COMBINED_PX = 40;
 
 function tapMaxMovePx() {
-  if (typeof window === "undefined") return TAP_MAX_MOVE_FINE_PX;
-  try {
-    return window.matchMedia("(pointer: coarse)").matches
-      ? TAP_MAX_MOVE_COARSE_PX
-      : TAP_MAX_MOVE_FINE_PX;
-  } catch {
-    return TAP_MAX_MOVE_FINE_PX;
-  }
+  return TAP_MAX_MOVE_FINE_PX;
 }
 
 function parseAudioTracks(audioSrc) {
@@ -120,7 +121,13 @@ export default function MusicCarousel() {
   const touchedCfItemRef = useRef(null);
   /** Mounted for centered album w/ .mp4 so play() can run in the same touch gesture as audio. */
   const activeAnimatedVideoRef = useRef(null);
-  const touchGestureRef = useRef({ startX: 0, startY: 0, maxDist: 0 });
+  const touchGestureRef = useRef({
+    startX: 0,
+    startY: 0,
+    maxDist: 0,
+    maxAbsDx: 0,
+    maxAbsDy: 0,
+  });
   const [isDragging, setIsDragging] = useState(false);
   const sectionInViewRef = useRef(true);
   /** When false (user prefers reduced motion), animated .mp4 covers are not mounted or played. */
@@ -389,7 +396,7 @@ export default function MusicCarousel() {
     touchedCfItemRef.current = e.target?.closest?.(".cf-item") ?? null;
     const x = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
     const y = e.clientY ?? e.touches?.[0]?.clientY ?? 0;
-    touchGestureRef.current = { startX: x, startY: y, maxDist: 0 };
+    touchGestureRef.current = { startX: x, startY: y, maxDist: 0, maxAbsDx: 0, maxAbsDy: 0 };
     setIsDragging(true);
     dragRef.current = { down: true, startX: x, prevX: x, prevTime: performance.now(), startOffset: scrollRef.current };
     velocityRef.current = 0;
@@ -404,6 +411,8 @@ export default function MusicCarousel() {
     const g = touchGestureRef.current;
     const d = Math.hypot(x - g.startX, y - g.startY);
     g.maxDist = Math.max(g.maxDist, d);
+    g.maxAbsDx = Math.max(g.maxAbsDx, Math.abs(x - g.startX));
+    g.maxAbsDy = Math.max(g.maxAbsDy, Math.abs(y - g.startY));
     const dx = x - dragRef.current.prevX;
     const now = performance.now();
     const dtMs = now - dragRef.current.prevTime;
@@ -501,14 +510,24 @@ export default function MusicCarousel() {
   onPointerUpRef.current = onPointerUp;
 
   handleNativeCenterTapRef.current = (e) => {
-    const tapSlop = tapMaxMovePx();
-    if (touchGestureRef.current.maxDist >= tapSlop) {
-      touchedCfItemRef.current = null;
-      return;
-    }
+    const g = touchGestureRef.current;
     if (
       Math.abs(scrollRef.current - dragRef.current.startOffset) > TAP_MAX_SCROLL_OFFSET_DELTA
     ) {
+      touchedCfItemRef.current = null;
+      return;
+    }
+    const isTouchEnd = e?.type === "touchend";
+    if (isTouchEnd) {
+      if (g.maxAbsDx > TOUCH_TAP_MAX_H_PX || g.maxAbsDy > TOUCH_TAP_MAX_V_PX) {
+        touchedCfItemRef.current = null;
+        return;
+      }
+      if (g.maxDist > TOUCH_TAP_MAX_COMBINED_PX) {
+        touchedCfItemRef.current = null;
+        return;
+      }
+    } else if (g.maxDist >= tapMaxMovePx()) {
       touchedCfItemRef.current = null;
       return;
     }
@@ -535,12 +554,12 @@ export default function MusicCarousel() {
 
     const rawSrc = albums[idx]?.audioSrc;
     if (rawSrc == null || rawSrc === "") {
-      touchGestureRef.current.maxDist = tapSlop;
+      touchGestureRef.current.maxDist = TOUCH_TAP_MAX_COMBINED_PX + 1;
       return;
     }
     const tracks = parseAudioTracks(rawSrc);
     if (tracks.length === 0) {
-      touchGestureRef.current.maxDist = tapSlop;
+      touchGestureRef.current.maxDist = TOUCH_TAP_MAX_COMBINED_PX + 1;
       return;
     }
 
@@ -580,7 +599,7 @@ export default function MusicCarousel() {
       activeAnimatedVideoRef.current?.pause?.();
     }
 
-    touchGestureRef.current.maxDist = tapSlop;
+    touchGestureRef.current.maxDist = TOUCH_TAP_MAX_COMBINED_PX + 1;
   };
 
   useEffect(() => {

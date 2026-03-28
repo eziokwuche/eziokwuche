@@ -822,6 +822,7 @@ select {
 
 a.education-list__school {
   text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 a.education-list__school:hover {
@@ -831,6 +832,12 @@ a.education-list__school:hover {
 
 a.education-list__school--uncg:hover {
   color: #ffb71b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a.education-list__school {
+    transition: none;
+  }
 }
 
 a.education-list__school:focus-visible {

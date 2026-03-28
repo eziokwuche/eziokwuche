@@ -16,6 +16,12 @@ const OFFSET_MULTIPLIER = 2.0;
 const AUTO_SCROLL = 0.00;
 const SNAP_DURATION = 400;
 const SCROLL_RENDER_EPS = 1e-5;
+/**
+ * If coverflow scroll offset moved more than this during the pointer gesture (in album-index
+ * units), touchend must not toggle play — otherwise small drags read as taps (worse with coarse
+ * tap slop on mobile).
+ */
+const TAP_MAX_SCROLL_OFFSET_DELTA = 0.03;
 /** Fine pointer: movement below this (px) counts as a tap for play/pause. */
 const TAP_MAX_MOVE_FINE_PX = 18;
 /** Touch / coarse pointer: allow more slop so a normal tap still toggles play (not confused with a tiny drag). */
@@ -290,6 +296,11 @@ export default function MusicCarousel() {
       new IntersectionObserver(
         ([e]) => {
           inViewRef.current = e.isIntersecting;
+          if (!e.isIntersecting) {
+            MUSIC_CAROUSEL_AUDIO_ENGINE.pause();
+            setIsPlaying(false);
+            activeAnimatedVideoRef.current?.pause?.();
+          }
           if (e.isIntersecting && rafRef.current == null) {
             lastTimeRef.current = 0;
             rafRef.current = requestAnimationFrame(loop);
@@ -492,6 +503,12 @@ export default function MusicCarousel() {
   handleNativeCenterTapRef.current = (e) => {
     const tapSlop = tapMaxMovePx();
     if (touchGestureRef.current.maxDist >= tapSlop) {
+      touchedCfItemRef.current = null;
+      return;
+    }
+    if (
+      Math.abs(scrollRef.current - dragRef.current.startOffset) > TAP_MAX_SCROLL_OFFSET_DELTA
+    ) {
       touchedCfItemRef.current = null;
       return;
     }

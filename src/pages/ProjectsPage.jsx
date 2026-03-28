@@ -3,10 +3,14 @@ import ProjectGrid from "@/components/ProjectGrid";
 export default function ProjectsPage() {
   return (
     <>
-      <section className="page-section">
+      <section className="page-section projects-page">
         <div className="container">
-          <h1 className="section-title">Projects</h1>
-          <ProjectGrid />
+          <div className="section-content-column">
+            <h1 className="section-title projects-page__section-heading">
+              Projects
+            </h1>
+            <ProjectGrid />
+          </div>
         </div>
       </section>
       <section className="page-section github-cta-section">
@@ -17,9 +21,9 @@ export default function ProjectsPage() {
             href="https://github.com/eziokwuche"
             target="_blank"
             rel="noopener noreferrer"
-            className="home-btn"
+            className="github-cta-btn"
           >
-            GitHub &#8599;
+            GitHub
           </a>
         </div>
       </section>

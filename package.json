@@ -10,10 +10,12 @@
     "knockout-logos": "node scripts/knockout-logos.mjs"
   },
   "dependencies": {
+    "@react-three/fiber": "^8.18.0",
     "gsap": "^3.14.2",
     "lucide-react": "^0.577.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "three": "^0.170.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.0",

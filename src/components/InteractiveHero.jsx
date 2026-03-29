@@ -123,12 +123,12 @@ export default function InteractiveHero() {
     }
 
     function onPointerUpCapture(e) {
-      getPointerCoords(e);
       try {
         canvas.releasePointerCapture(e.pointerId);
       } catch {
         /* */
       }
+      clearPointer();
     }
 
     function onPointerCancelCapture(e) {
@@ -183,7 +183,7 @@ export default function InteractiveHero() {
       sizeCanvas();
 
       const vMin = Math.min(cw, ch);
-      dotSize = vMin < 500 ? 4 : vMin < 800 ? 5 : vMin < 1200 ? 6 : 7;
+      dotSize = vMin < 500 ? 5 : vMin < 800 ? 5 : vMin < 1200 ? 6 : 7;
       dotSprite = makeDotSprite(dotSize);
 
       const imgRatio = img.naturalWidth / img.naturalHeight;
@@ -200,7 +200,7 @@ export default function InteractiveHero() {
       offY = (ch - th) / 2 + HERO_VERTICAL_NUDGE_PX;
       targetH = th;
 
-      let step = vMin < 500 ? 7 : vMin < 800 ? 8 : vMin < 1200 ? 9 : 10;
+      let step = vMin < 500 ? 12 : vMin < 800 ? 10 : vMin < 1200 ? 8 : 7;
       let cols = Math.max(1, Math.floor(tw / step));
       let rows = Math.max(1, Math.floor(th / step));
       while (cols * rows > MAX_PARTICLES * 1.4 && step < 20) {
@@ -361,7 +361,7 @@ export default function InteractiveHero() {
         }
 
         const sinIdx =
-          (((((el + p.phase) % 300) / 300) * SIN_SIZE) | 0) &
+          (((((el + p.phase) % 2000) / 2000) * SIN_SIZE) | 0) &
           (SIN_SIZE - 1);
         const phaseMod = 0.5 + 0.5 * SIN_TABLE[sinIdx];
         const a = baseA * phaseMod;

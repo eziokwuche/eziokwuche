@@ -135,6 +135,10 @@ export default function MusicCarousel() {
   /** Mounted for centered album w/ .mp4 so play() can run in the same touch gesture as audio. */
   const activeAnimatedVideoRef = useRef(null);
   const isPlayingRef = useRef(false);
+  /** Keep ref aligned with context so keyboard / async paths toggle correctly (tap sets ref inline). */
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
   const lastTouchEndTimeRef = useRef(0);
   const tapPlayingRef = useRef(false);
   const lastTapTimeRef = useRef(0);
@@ -594,6 +598,7 @@ export default function MusicCarousel() {
             if (vp !== undefined) void vp.catch(() => {});
           }
           audio.volume = 1;
+          isPlayingRef.current = true;
           setIsPlaying(true);
           const p = audio.play();
           if (p !== undefined) {

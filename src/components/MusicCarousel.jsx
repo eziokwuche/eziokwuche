@@ -20,20 +20,20 @@ const SCROLL_RENDER_EPS = 1e-5;
  * If coverflow scroll offset moved more than this during the gesture (album-index units), do not
  * treat as a play/pause tap.
  */
-const TAP_MAX_SCROLL_OFFSET_DELTA = 0.02;
+const TAP_MAX_SCROLL_OFFSET_DELTA = 0.08;
 /** Fine pointer (mouse): max movement from down→up for a tap. */
 const TAP_MAX_MOVE_FINE_PX = 18;
 /**
  * Touch: horizontal movement beyond this is a carousel drag (coverflow only uses dx), not a tap.
  */
-const TOUCH_TAP_MAX_H_PX = 16;
+const TOUCH_TAP_MAX_H_PX = 22;
 /**
  * Touch: vertical movement beyond this is usually page scroll; combined slop alone would still
  * allow play because scrollRef barely changes.
  */
-const TOUCH_TAP_MAX_V_PX = 28;
+const TOUCH_TAP_MAX_V_PX = 44;
 /** Touch: max total wiggle from touch point for a tap (after axis checks). */
-const TOUCH_TAP_MAX_COMBINED_PX = 40;
+const TOUCH_TAP_MAX_COMBINED_PX = 60;
 
 function tapMaxMovePx() {
   return TAP_MAX_MOVE_FINE_PX;
@@ -137,6 +137,7 @@ export default function MusicCarousel() {
   const isPlayingRef = useRef(false);
   const lastTouchEndTimeRef = useRef(0);
   const tapPlayingRef = useRef(false);
+  const lastTapTimeRef = useRef(0);
   const touchGestureRef = useRef({
     startX: 0,
     startY: 0,
@@ -173,11 +174,6 @@ export default function MusicCarousel() {
   }, [allowAnimatedAlbumCovers]);
 
   currentTrackIdxRef.current = currentTrackIdx;
-
-  // Keep ref in sync with context state so mobile tap toggles behave deterministically.
-  useEffect(() => {
-    isPlayingRef.current = isPlaying;
-  }, [isPlaying]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -476,6 +472,8 @@ export default function MusicCarousel() {
     g.maxDist = Math.max(g.maxDist, d);
     g.maxAbsDx = Math.max(g.maxAbsDx, Math.abs(x - g.startX));
     g.maxAbsDy = Math.max(g.maxAbsDy, Math.abs(y - g.startY));
+    // Don't scroll for tiny movements — keeps gesture untainted for audio on iOS
+    if (d < 6) return;
     const isTouchMove =
       e.type === "touchmove" || e.pointerType === "touch";
     if (
@@ -658,6 +656,9 @@ export default function MusicCarousel() {
   onPointerUpRef.current = onPointerUp;
 
   handleNativeCenterTapRef.current = (e) => {
+    const now = Date.now();
+    if (now - lastTapTimeRef.current < 800) return;
+    lastTapTimeRef.current = now;
     const g = touchGestureRef.current;
     const isTouchEnd = e?.type === "touchend";
     if (isTouchEnd) {
@@ -682,11 +683,9 @@ export default function MusicCarousel() {
     if (raw === undefined) return;
     const idx = Number(raw);
 
-    const maxTapScrollDelta = isTouchEnd
-      ? TAP_MAX_SCROLL_OFFSET_DELTA * 2.75
-      : TAP_MAX_SCROLL_OFFSET_DELTA;
     if (
-      Math.abs(scrollRef.current - dragRef.current.startOffset) > maxTapScrollDelta
+      !isTouchEnd &&
+      Math.abs(scrollRef.current - dragRef.current.startOffset) > TAP_MAX_SCROLL_OFFSET_DELTA
     )
       return;
 

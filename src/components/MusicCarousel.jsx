@@ -136,6 +136,7 @@ export default function MusicCarousel() {
   const activeAnimatedVideoRef = useRef(null);
   const isPlayingRef = useRef(false);
   const lastTouchEndTimeRef = useRef(0);
+  const tapPlayingRef = useRef(false);
   const touchGestureRef = useRef({
     startX: 0,
     startY: 0,
@@ -242,6 +243,7 @@ export default function MusicCarousel() {
       const p = audio.play();
       if (p !== undefined) {
         void p.catch(() => {
+          isPlayingRef.current = false;
           setIsPlaying(false);
           activeAnimatedVideoRef.current?.pause?.();
         });
@@ -275,12 +277,14 @@ export default function MusicCarousel() {
     const idx = activeIdxRef.current;
     const tracks = parseAudioTracks(albums[idx]?.audioSrc);
     if (tracks.length === 0) {
+      isPlayingRef.current = false;
       setIsPlaying(false);
       activeAnimatedVideoRef.current?.pause?.();
       return;
     }
     const nextIdx = advanceToNextInShuffleOrder(tracks);
     if (nextIdx == null) {
+      isPlayingRef.current = false;
       setIsPlaying(false);
       activeAnimatedVideoRef.current?.pause?.();
       return;
@@ -307,6 +311,7 @@ export default function MusicCarousel() {
     const p = audio.play();
     if (p !== undefined) {
       void p.catch(() => {
+        isPlayingRef.current = false;
         setIsPlaying(false);
         activeAnimatedVideoRef.current?.pause?.();
       });
@@ -357,6 +362,7 @@ export default function MusicCarousel() {
           inViewRef.current = e.isIntersecting;
           if (!e.isIntersecting) {
             MUSIC_CAROUSEL_AUDIO_ENGINE.pause();
+            isPlayingRef.current = false;
             setIsPlaying(false);
             activeAnimatedVideoRef.current?.pause?.();
           }
@@ -420,10 +426,11 @@ export default function MusicCarousel() {
       let needsTick = false;
       if (closest !== activeIdxRef.current) {
         activeIdxRef.current = closest;
-        /* Same tick as album index: pause + isPlaying false before paint, so GlobalAmbient
-         never binds the new cover while still "playing" (avoids wrong art during fade). */
-        MUSIC_CAROUSEL_AUDIO_ENGINE.pause();
-        setIsPlaying(false);
+        if (!tapPlayingRef.current) {
+          MUSIC_CAROUSEL_AUDIO_ENGINE.pause();
+          isPlayingRef.current = false;
+          setIsPlaying(false);
+        }
         setActiveIdx(closest);
         needsTick = true;
       }
@@ -579,7 +586,7 @@ export default function MusicCarousel() {
         if (tracks.length === 0) return;
         e.preventDefault();
         const audio = MUSIC_CAROUSEL_AUDIO_ENGINE;
-        if (audio.paused) {
+        if (!isPlayingRef.current) {
           const v = activeAnimatedVideoRef.current;
           if (v && albums[idx]?.animatedCover) {
             v.muted = true;
@@ -593,12 +600,14 @@ export default function MusicCarousel() {
           const p = audio.play();
           if (p !== undefined) {
             void p.catch(() => {
+              isPlayingRef.current = false;
               setIsPlaying(false);
               activeAnimatedVideoRef.current?.pause?.();
             });
           }
         } else {
           audio.pause();
+          isPlayingRef.current = false;
           setIsPlaying(false);
           activeAnimatedVideoRef.current?.pause?.();
         }
@@ -713,6 +722,7 @@ export default function MusicCarousel() {
       const p = audio.play();
       if (p !== undefined) {
         void p.catch(() => {
+          isPlayingRef.current = false;
           setIsPlaying(false);
           activeAnimatedVideoRef.current?.pause?.();
         });
@@ -737,6 +747,8 @@ export default function MusicCarousel() {
 
     if (shouldPlay) {
       isPlayingRef.current = true;
+      tapPlayingRef.current = true;
+      setTimeout(() => { tapPlayingRef.current = false; }, 600);
       // Kick off video + audio in the same synchronous gesture tick (iOS requirement)
       const v = activeAnimatedVideoRef.current;
       if (v && albums[idx]?.animatedCover) {
@@ -757,6 +769,8 @@ export default function MusicCarousel() {
             const v2 = activeAnimatedVideoRef.current;
             if (v2 && albums[idx]?.animatedCover && v2.paused) {
               v2.muted = true;
+              v2.setAttribute("playsinline", "");
+              v2.setAttribute("webkit-playsinline", "");
               const vp2 = v2.play();
               if (vp2 !== undefined) void vp2.catch(() => {});
             }
@@ -771,6 +785,7 @@ export default function MusicCarousel() {
         setIsPlaying(true);
       }
     } else {
+      tapPlayingRef.current = false;
       isPlayingRef.current = false;
       setIsPlaying(false);
       audio.pause();

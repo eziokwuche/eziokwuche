@@ -39,6 +39,17 @@ export default function InteractiveHero() {
   );
 
   useEffect(() => {
+    // Lock hero height to initial viewport — prevents resize on iOS scroll
+    let lockedHeroHeightPx = 0;
+    const setHeroVh = () => {
+      const vh = window.innerHeight * 0.01;
+      lockedHeroHeightPx = vh * 100;
+      document.documentElement.style.setProperty("--hero-vh", `${vh}px`);
+    };
+    setHeroVh();
+    // Only update on real orientation changes, not iOS scroll bar hide/show
+    window.addEventListener("orientationchange", setHeroVh);
+
     const canvas = canvasRef.current;
     const section = sectionRef.current;
     if (!canvas || !section) return;
@@ -77,7 +88,8 @@ export default function InteractiveHero() {
 
     function sizeCanvas() {
       const w = window.innerWidth;
-      const h = window.innerHeight;
+      // Use the locked hero height so iOS address bar changes do not visually expand/contract.
+      const h = lockedHeroHeightPx || window.innerHeight;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const newBufW = (w * dpr) | 0;
       const newBufH = (h * dpr) | 0;
@@ -480,6 +492,7 @@ export default function InteractiveHero() {
     applyBreakpoint();
 
     return () => {
+      window.removeEventListener("orientationchange", setHeroVh);
       destroyed = true;
       stopLoop();
       observer.disconnect();

@@ -236,12 +236,15 @@ select {
 .hero {
   position: relative;
   width: 100vw;
-  height: 100vh;
-  height: 100dvh;
+  height: calc(var(--hero-vh, 1vh) * 100);
   overflow: hidden;
   background: transparent;
   cursor: pointer;
   touch-action: pan-y;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .hero canvas {

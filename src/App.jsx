@@ -32,6 +32,13 @@ export default function App() {
   }, [view, setIsPlaying]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    // Mobile: avoid ScrollSmoother/ScrollTrigger pinning & recalculation that can fight iOS viewport changes.
+    if (window.innerWidth <= 768) {
+      window.__scrollSmoother = null;
+      return;
+    }
+
     smootherRef.current = ScrollSmoother.create({
       wrapper: "#smooth-wrapper",
       content: "#smooth-content",
@@ -50,9 +57,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (smootherRef.current) {
-      smootherRef.current.scrollTo(0, false);
-    }
+    if (!smootherRef.current) return;
+    smootherRef.current.scrollTo(0, false);
     const id = requestAnimationFrame(() => {
       ScrollTrigger.refresh(true);
     });

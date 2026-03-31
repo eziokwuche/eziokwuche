@@ -1,9 +1,11 @@
+import InteractiveHero from "@/components/InteractiveHero";
 import ProjectGrid from "@/components/ProjectGrid";
 
 export default function ProjectsPage() {
   return (
     <>
-      <section className="page-section projects-page">
+      <InteractiveHero />
+      <section id="content" className="page-section projects-page">
         <div className="container">
           <div className="section-content-column">
             <h1 className="section-title projects-page__section-heading">

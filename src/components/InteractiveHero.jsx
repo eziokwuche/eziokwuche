@@ -510,9 +510,40 @@ export default function InteractiveHero() {
     };
   }, []);
 
+  useEffect(() => {
+    let rafId = 0;
+    let lastState = null;
+
+    const getScrollY = () => {
+      const smoother = window.__scrollSmoother;
+      if (smoother && typeof smoother.scrollTop === "function") {
+        return smoother.scrollTop();
+      }
+      return window.scrollY || window.pageYOffset || 0;
+    };
+
+    const tick = () => {
+      const section = sectionRef.current;
+      if (section) {
+        const isScrolled = getScrollY() > 10;
+        if (isScrolled !== lastState) {
+          section.classList.toggle("hero--scrolled", isScrolled);
+          lastState = isScrolled;
+        }
+      }
+      rafId = window.requestAnimationFrame(tick);
+    };
+
+    rafId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(rafId);
+  }, []);
+
   return (
     <section ref={setSectionRef} className="hero">
       <canvas ref={canvasRef} />
+      <span className="hero-scroll-indicator" aria-hidden="true">
+        ↓
+      </span>
     </section>
   );
 }

@@ -1,3 +1,4 @@
+import InteractiveHero from "@/components/InteractiveHero";
 import EducationSection from "@/components/EducationSection";
 import ExperienceTimeline from "@/components/ExperienceTimeline";
 import SkillsMarquee from "@/components/SkillsMarquee";
@@ -6,7 +7,8 @@ import { skillsMarqueeRow1, skillsMarqueeRow2 } from "@/data/skills";
 export default function ExperiencePage() {
   return (
     <>
-      <section className="page-section experience-page">
+      <InteractiveHero />
+      <section id="content" className="page-section experience-page">
         <div className="container">
           <div className="section-content-column section-content-column--experience">
             <h1 className="section-title experience-page__section-heading">

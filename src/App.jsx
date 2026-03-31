@@ -25,6 +25,16 @@ export default function App() {
   const smootherRef = useRef(null);
   const { setIsPlaying } = useMusicPlayback();
 
+  function scrollToTopImmediate() {
+    if (window.__scrollSmoother?.scrollTo) {
+      window.__scrollSmoother.scrollTo(0, false);
+      return;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }
+
   /** Leaving any page (e.g. About with music) should stop audio + fade global ambient to black. */
   useEffect(() => {
     MUSIC_CAROUSEL_AUDIO_ENGINE.pause();
@@ -57,10 +67,9 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!smootherRef.current) return;
-    smootherRef.current.scrollTo(0, false);
+    scrollToTopImmediate();
     const id = requestAnimationFrame(() => {
-      ScrollTrigger.refresh(true);
+      if (smootherRef.current) ScrollTrigger.refresh(true);
     });
     return () => cancelAnimationFrame(id);
   }, [view]);
@@ -82,7 +91,7 @@ export default function App() {
 
     // Beat browser scroll restoration + ensure Smoother is at top after reload
     requestAnimationFrame(() => {
-      window.__scrollSmoother?.scrollTo(0, false);
+      scrollToTopImmediate();
     });
 
     window.addEventListener("hashchange", syncFromHash);

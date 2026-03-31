@@ -255,6 +255,52 @@ select {
   pointer-events: auto;
 }
 
+.hero-scroll-indicator {
+  position: absolute;
+  right: clamp(16px, 3vw, 32px);
+  bottom: clamp(18px, 4vh, 40px);
+  font-size: clamp(16px, 2vw, 24px);
+  line-height: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.28) 0%,
+    rgba(255, 255, 255, 1) 48%,
+    rgba(255, 255, 255, 0.28) 100%
+  );
+  background-size: 100% 220%;
+  background-position: 50% 0%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.38));
+  pointer-events: none;
+  user-select: none;
+  animation: hero-scroll-flow 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  transition: opacity 260ms ease-out, transform 260ms ease-out;
+  z-index: 2;
+}
+
+.hero.hero--scrolled .hero-scroll-indicator {
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+@keyframes hero-scroll-flow {
+  0% {
+    background-position: 50% 0%;
+    opacity: 0.82;
+  }
+  50% {
+    background-position: 50% 100%;
+    opacity: 1;
+  }
+  100% {
+    background-position: 50% 0%;
+    opacity: 0.82;
+  }
+}
+
 /* ── Page sections ────────────────────────────── */
 
 .page-section {

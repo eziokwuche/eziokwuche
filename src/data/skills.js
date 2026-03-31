@@ -35,11 +35,7 @@ export const skillsMarqueeRow2 = [
   { name: "Illustrator", logo: "/skills-logos/illustrator.svg" },
   { name: "After Effects", logo: "/skills-logos/after-effects.svg" },
   { name: "Figma", logo: "/skills-logos/figma.svg" },
-  {
-    name: "R",
-    logo: "/skills-logos/r.svg",
-    ariaLabel: "R",
-  },
+  { name: "R", logo: "/skills-logos/r.svg", ariaLabel: "R"},
   { name: "Docker", logo: "/skills-logos/docker.svg" },
   { name: "Twine", logo: "/skills-logos/twine.svg" },
   { name: "Excel", logo: "/skills-logos/excel.svg" },

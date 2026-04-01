@@ -36,7 +36,7 @@ export default function ExperiencePage() {
             </h2>
             <div className="skills-marquee-stack__content">
               <SkillsMarquee skills={skillsMarqueeRow1} durationSec={25} />
-              <SkillsMarquee skills={skillsMarqueeRow2} reverse durationSec={28} />
+              <SkillsMarquee skills={skillsMarqueeRow2} reverse durationSec={25} />
             </div>
           </div>
         </div>

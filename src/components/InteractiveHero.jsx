@@ -12,8 +12,8 @@ const MAX_PARTICLES = 8500;
 const PROX_RAD_SQ = 180 * 180;
 const ALPHA_LEVELS = 16;
 
-const HERO_DESKTOP = "/Portfolio Hero-Desktop.png";
-const HERO_MOBILE = "/Portfolio Hero-Mobile.png";
+const HERO_DESKTOP = "/assets/hero-desktop.png";
+const HERO_MOBILE = "/assets/hero-mobile.png";
 
 /** Nudge the hero down from vertical center so bottom dots sit on the viewport edge. */
 const HERO_VERTICAL_NUDGE_PX = 6;

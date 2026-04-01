@@ -11,6 +11,6 @@ export default [
     credential:
       "School of Education — Bachelor of Science in Information Science",
     period: "2021–2025",
-    logo: "/skills-logos/UNCG_Spartans_logo.svg",
+    logo: "/experience-logos/UNCG_Spartans_logo.svg",
   },
 ];

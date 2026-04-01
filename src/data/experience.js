@@ -2,7 +2,7 @@ const experience = [
   {
     title: "Co-Founder & Operations Manager",
     company: "InOptive Studios",
-    logo: "/skills-logos/inoptive-logo.svg",
+    logo: "/experience-logos/inoptive-logo.svg",
     location: "Raleigh, NC",
     period: "Sept. 2020 — Dec. 2025",
     endDate: "2025-12-31",
@@ -23,7 +23,7 @@ const experience = [
   {
     title: "Data Analysis Intern",
     company: "Microchip Technology Inc.",
-    logo: "/skills-logos/microchip-1-logo-svg-vector.svg",
+    logo: "/experience-logos/microchip-1-logo-svg-vector.svg",
     location: "Greensboro, NC",
     period: "Aug. 2023 — Nov. 2023",
     endDate: "2023-11-30",

@@ -1,19 +1,7 @@
-/**
- * Skills marquees: two disjoint rows.
- * `logo` — SVG (or raster) in /public/skills-logos (full color on pill hover).
- */
 export const skillsMarqueeRow1 = [
   { name: "Python", logo: "/skills-logos/python.svg" },
-  {
-    name: "JS",
-    logo: "/skills-logos/javascript.svg",
-    ariaLabel: "JavaScript",
-  },
-  {
-    name: "TS",
-    logo: "/skills-logos/typescript.svg",
-    ariaLabel: "TypeScript",
-  },
+  { name: "JS", logo: "/skills-logos/javascript.svg", ariaLabel: "JavaScript",},
+  { name: "TS", logo: "/skills-logos/typescript.svg", ariaLabel: "TypeScript",},
   { name: "Tailwind CSS", logo: "/skills-logos/tailwind.svg" },
   { name: "Java", logo: "/skills-logos/java.svg" },
   { name: "Node.js", logo: "/skills-logos/nodejs.svg" },
